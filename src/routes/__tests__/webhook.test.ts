@@ -25,15 +25,9 @@ const validPaymentEvent: PaymentEvent = {
   mc_gross: 1,
 }
 
-let response: request.Response = null as unknown as request.Response
-
 const sendValidRequest = (): request.Test => {
   return makeRequest(validPaymentEvent)
 }
-
-beforeEach(async () => {
-  response = await sendValidRequest()
-})
 
 const testValidResponse = async (response: request.Response): Promise<void> => {
   expect(response.status).toEqual(200)
@@ -65,10 +59,12 @@ describe('When the authorization succeeds', () => {
   })
 
   it('Should return a status of 200', async () => {
+    const response = await sendValidRequest()
     testValidResponse(response)
   })
 
   it('Should add the payment to the database', async () => {
+    await sendValidRequest()
     const payment: PaymentMatch = await findValidPaymentInDatabase()
     expect(payment).toBeTruthy()
   })
@@ -78,11 +74,19 @@ describe('When the authorization succeeds', () => {
       await PaypalPaymentService.create(validPaymentEvent)
     })
 
-    it.todo('Should not add it again')
+    it('Should not add it again', async () => {
+      await sendValidRequest()
+      const payment: PaymentMatch = await findValidPaymentInDatabase()
+      expect(payment).toBeNull()
+    })
   })
 
-  describe('When there is not a transaction in database', () => {
+  describe('When there is not a transaction in database and the recipient email is valid', () => {
     it.todo('Should add it')
+  })
+
+  describe('When the recipient email is not the expected email', () => {
+    it.todo('Should not add it to the database')
   })
 })
 
@@ -91,7 +95,8 @@ describe('When the authorization fails', () => {
     mockAxiosResponse('INVALID')
   })
 
-  it('Should return 200', () => {
+  it('Should return 200', async () => {
+    const response = await sendValidRequest()
     testValidResponse(response)
   })
 
