@@ -110,14 +110,18 @@ describe('When the authorization succeeds', () => {
 })
 
 describe('When the authorization fails', () => {
-  beforeEach(() => {
+  let response: request.Response = null as unknown as request.Response
+
+  beforeAll(async () => {
     mockAxiosResponse('INVALID')
+    response = await sendValidRequest()
   })
 
   it('Should return 200', async () => {
-    const response = await sendValidRequest()
     testValidResponse(response)
   })
 
-  it.todo('Should not add the payment to the database')
+  it('Should not add the payment to the database', async () => {
+    await expectNotToFindPaymentDetails()
+  })
 })
