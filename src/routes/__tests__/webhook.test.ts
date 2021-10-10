@@ -103,7 +103,7 @@ describe('When the authorization succeeds', () => {
     it('Should not add it to the database', async () => {
       await makeRequest({
         ...validPaymentEvent,
-        payer_email: 'some other email',
+        receiver_email: 'some other email',
       })
       await expectNotToFindPaymentDetails()
     })
