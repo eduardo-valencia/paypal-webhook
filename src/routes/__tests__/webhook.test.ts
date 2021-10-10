@@ -1,7 +1,13 @@
 import request from "supertest";
-import app from "../../app";
+import axios from "axios";
 
+import app from "../../app";
 import PaymentEvent from "../../types/PaymentEvent";
+import ValidationResponse, {
+  ValidationBody,
+} from "../../types/ValidationResponse";
+
+jest.mock("axios");
 
 const makeRequest = (event: PaymentEvent): request.Test => {
   return request(app).post("/paypal-webhook").send(event);
@@ -29,7 +35,22 @@ const testValidResponse = async (response: request.Response): Promise<void> => {
   expect(response.status).toEqual(200);
 };
 
+type BodyPromise = Promise<ValidationResponse>;
+
+const mockAxiosResponse = (body: ValidationBody) => {
+  const bodyPromise: BodyPromise = new Promise((resolve) =>
+    resolve({ data: body })
+  );
+  return (axios.post as unknown as jest.MockedFunction<any>).mockResolvedValue(
+    bodyPromise
+  );
+};
+
 describe("When the authorization succeeds", () => {
+  beforeEach(() => {
+    mockAxiosResponse("VERIFIED");
+  });
+
   it("Should return a status of 200", async () => {
     testValidResponse(response);
   });
@@ -46,6 +67,10 @@ describe("When the authorization succeeds", () => {
 });
 
 describe("When the authorization fails", () => {
+  beforeEach(() => {
+    mockAxiosResponse("INVALID");
+  });
+
   it("Should return 200", () => {
     testValidResponse(response);
   });
