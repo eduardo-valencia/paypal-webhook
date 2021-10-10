@@ -42,7 +42,7 @@ const getIfDuplicatePaymentExists = async ({
 }: PaymentEvent): Promise<boolean> => {
   const existingPayment: PaypalPaymentDocument | undefined =
     await PaypalPaymentRepo.findOne({ status: payment_status, apiId: txn_id })
-  return !!existingPayment
+  return !existingPayment
 }
 
 const validateEventData = async (body: any): Promise<boolean> => {
