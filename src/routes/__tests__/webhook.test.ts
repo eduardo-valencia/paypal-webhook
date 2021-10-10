@@ -29,11 +29,21 @@ const testValidResponse = async (response: request.Response): Promise<void> => {
   expect(response.status).toEqual(200);
 };
 
-it("Should return a status of 200", async () => {
-  testValidResponse(response);
-});
+describe("When the authorization succeeds", () => {
+  it("Should return a status of 200", async () => {
+    testValidResponse(response);
+  });
 
-it.todo("Should add the payment to the database");
+  it.todo("Should add the payment to the database");
+
+  describe("When there is already a transaction in the database", () => {
+    it.todo("Should not add it again");
+  });
+
+  describe("When there is not a transaction in database", () => {
+    it.todo("Should add it");
+  });
+});
 
 describe("When the authorization fails", () => {
   it("Should return 200", () => {
