@@ -23,6 +23,7 @@ const validPaymentEvent: PaymentEvent = {
   payer_email: 'eduardo@supercoder.dev',
   payment_status: 'Completed',
   mc_gross: 1,
+  receiver_email: '',
 }
 
 const sendValidRequest = (): request.Test => {
@@ -46,11 +47,21 @@ const mockAxiosResponse = (body: ValidationBody) => {
 
 type PaymentMatch = PaypalPaymentType | null
 
-const findValidPaymentInDatabase = async (): Promise<PaymentMatch> => {
+const findPaymentDetails = async (): Promise<PaymentMatch> => {
   return PaypalPaymentRepo.findOne({
     status: validPaymentEvent.payment_status,
     apiId: validPaymentEvent.txn_id,
   })
+}
+
+const expectToFindPaymentDetails = async () => {
+  const payment: PaymentMatch = await findPaymentDetails()
+  expect(payment).toBeTruthy()
+}
+
+const expectNotToFindPaymentDetails = async () => {
+  const payment: PaymentMatch = await findPaymentDetails()
+  expect(payment).toBeNull()
 }
 
 describe('When the authorization succeeds', () => {
@@ -65,8 +76,7 @@ describe('When the authorization succeeds', () => {
 
   it('Should add the payment to the database', async () => {
     await sendValidRequest()
-    const payment: PaymentMatch = await findValidPaymentInDatabase()
-    expect(payment).toBeTruthy()
+    await expectToFindPaymentDetails()
   })
 
   describe('When there is already a transaction in the database', () => {
@@ -76,17 +86,25 @@ describe('When the authorization succeeds', () => {
 
     it('Should not add it again', async () => {
       await sendValidRequest()
-      const payment: PaymentMatch = await findValidPaymentInDatabase()
-      expect(payment).toBeNull()
+      await expectNotToFindPaymentDetails()
     })
   })
 
   describe('When there is not a transaction in database and the recipient email is valid', () => {
-    it.todo('Should add it')
+    it('Should add it', async () => {
+      await sendValidRequest()
+      await expectToFindPaymentDetails()
+    })
   })
 
   describe('When the recipient email is not the expected email', () => {
-    it.todo('Should not add it to the database')
+    it('Should not add it to the database', async () => {
+      await makeRequest({
+        ...validPaymentEvent,
+        payer_email: 'some other email',
+      })
+      await expectNotToFindPaymentDetails()
+    })
   })
 })
 
