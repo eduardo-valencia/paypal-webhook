@@ -1,5 +1,6 @@
 import request from 'supertest'
 import axios from 'axios'
+import { Document } from 'mongoose'
 
 import app from '../../app'
 import PaymentEvent from '../../types/PaymentEvent'
@@ -46,7 +47,7 @@ const mockAxiosResponse = (body: ValidationBody) => {
   )
 }
 
-type PaymentMatch = PaypalPaymentType | null
+type PaymentMatch = Document<PaypalPaymentType> | undefined
 
 const findPaymentDetails = async (): Promise<PaymentMatch> => {
   return PaypalPaymentRepo.findOne({
@@ -62,7 +63,7 @@ const expectToFindPaymentDetails = async () => {
 
 const expectNotToFindPaymentDetails = async () => {
   const payment: PaymentMatch = await findPaymentDetails()
-  expect(payment).toBeNull()
+  expect(payment).toBeUndefined()
 }
 
 describe('When the authorization succeeds', () => {
