@@ -15,11 +15,30 @@ const validPaymentEvent: PaymentEvent = {
   payment_status: "Completed",
 };
 
+let response: request.Response = null as unknown as request.Response;
+
 const sendValidRequest = (): request.Test => {
   return makeRequest(validPaymentEvent);
 };
 
-it("Should return a status of 200", async () => {
-  const response = await sendValidRequest();
+beforeEach(async () => {
+  response = await sendValidRequest();
+});
+
+const testValidResponse = async (response: request.Response): Promise<void> => {
   expect(response.status).toEqual(200);
+};
+
+it("Should return a status of 200", async () => {
+  testValidResponse(response);
+});
+
+it.todo("Should add the payment to the database");
+
+describe("When the authorization fails", () => {
+  it("Should return 200", () => {
+    testValidResponse(response);
+  });
+
+  it.todo("Should not add the payment to the database");
 });
