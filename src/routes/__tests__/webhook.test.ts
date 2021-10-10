@@ -48,23 +48,23 @@ const mockAxiosResponse = (body: ValidationBody) => {
   )
 }
 
-type PaymentMatch = Document<PaypalPaymentType> | undefined
+type PaymentMatch = Document<PaypalPaymentType>[]
 
 const findPaymentDetails = async (): Promise<PaymentMatch> => {
-  return PaypalPaymentRepo.findOne({
+  return PaypalPaymentRepo.find({
     status: validPaymentEvent.payment_status,
     apiId: validPaymentEvent.txn_id,
   })
 }
 
 const expectToFindPaymentDetails = async () => {
-  const payment: PaymentMatch = await findPaymentDetails()
-  expect(payment).toBeTruthy()
+  const payments: PaymentMatch = await findPaymentDetails()
+  expect(payments.length).toBeGreaterThan(0)
 }
 
 const expectNotToFindPaymentDetails = async () => {
-  const payment: PaymentMatch = await findPaymentDetails()
-  expect(payment).toBeUndefined()
+  const payments: PaymentMatch = await findPaymentDetails()
+  expect(payments).toHaveLength(0)
 }
 
 describe('When the authorization succeeds', () => {
@@ -77,7 +77,7 @@ describe('When the authorization succeeds', () => {
     testValidResponse(response)
   })
 
-  it('Should add the payment to the database', async () => {
+  it('And the there is not a transaction in database and the recipient email is valid, it should add it to the database', async () => {
     await sendValidRequest()
     await expectToFindPaymentDetails()
   })
@@ -88,15 +88,8 @@ describe('When the authorization succeeds', () => {
     })
 
     it('Should not add it again', async () => {
-      await sendValidRequest()
-      await expectNotToFindPaymentDetails()
-    })
-  })
-
-  describe('When there is not a transaction in database and the recipient email is valid', () => {
-    it('Should add it', async () => {
-      await sendValidRequest()
-      await expectToFindPaymentDetails()
+      const payments: PaymentMatch = await findPaymentDetails()
+      expect(payments).toHaveLength(1)
     })
   })
 
@@ -120,7 +113,7 @@ describe('When the authorization fails', () => {
   })
 
   it('Should return 200', async () => {
-    testValidResponse(response)
+    await testValidResponse(response)
   })
 
   it('Should not add the payment to the database', async () => {

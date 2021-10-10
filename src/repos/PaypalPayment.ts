@@ -5,6 +5,8 @@ import PaypalPaymentType, {
   PaypalPaymentDocument,
 } from '../types/PaypalPayment'
 
+type Query = FilterQuery<PaypalPaymentDocument>
+
 class PaypalPaymentRepo {
   static create = (
     paymentInfo: Omit<PaypalPaymentType, '_id'>
@@ -13,9 +15,13 @@ class PaypalPaymentRepo {
   }
 
   static findOne = async (
-    query: FilterQuery<PaypalPaymentDocument>
+    query: Query
   ): Promise<PaypalPaymentDocument | undefined> => {
     return PaypalPayment.findOne(query)
+  }
+
+  static find = async (query: Query): Promise<PaypalPaymentDocument[]> => {
+    return PaypalPayment.find(query)
   }
 }
 
