@@ -1,6 +1,7 @@
 import request from 'supertest'
 import axios from 'axios'
 import { Document } from 'mongoose'
+import { v4 as uuid } from 'uuid'
 
 import app from '../../app'
 import PaymentEvent from '../../types/PaymentEvent'
@@ -19,8 +20,8 @@ const makeRequest = (event: PaymentEvent): request.Test => {
   return request(app).post(routes.webhook).send(event)
 }
 
-const validPaymentEvent: PaymentEvent = {
-  txn_id: 'id',
+let validPaymentEvent: PaymentEvent = {
+  txn_id: uuid(),
   first_name: 'Eduardo',
   last_name: 'Valencia',
   payer_email: 'eduardo@supercoder.dev',
@@ -28,6 +29,11 @@ const validPaymentEvent: PaymentEvent = {
   mc_gross: 1,
   receiver_email: keys.paypalEmail,
 }
+
+beforeEach(() => {
+  // Makes a new payment event for each test. Allows tests to run in parallel
+  validPaymentEvent.txn_id = uuid()
+})
 
 const sendValidRequest = (): request.Test => {
   return makeRequest(validPaymentEvent)
