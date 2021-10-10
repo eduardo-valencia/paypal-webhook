@@ -6,9 +6,12 @@ jest.setTimeout(20000)
 let mongo: MongoMemoryServer = null as unknown as MongoMemoryServer
 
 const setupMongoose = async () => {
-  mongo = new MongoMemoryServer()
+  mongo = await MongoMemoryServer.create()
   const mongoUri: string = mongo.getUri()
-  await mongoose.connect(mongoUri)
+  await mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
 }
 
 const clearCollectionData = (collection: any) => collection.deleteMany({})
