@@ -9,6 +9,7 @@ import ValidationResponse, {
 import PaypalPaymentRepo from '../../repos/PaypalPayment'
 import PaypalPaymentType from '../../types/PaypalPayment'
 import PaypalPaymentService from '../../services/PaypalPayment'
+import keys from '../../config/keys'
 
 jest.mock('axios')
 
@@ -23,7 +24,7 @@ const validPaymentEvent: PaymentEvent = {
   payer_email: 'eduardo@supercoder.dev',
   payment_status: 'Completed',
   mc_gross: 1,
-  receiver_email: '',
+  receiver_email: keys.paypalEmail,
 }
 
 const sendValidRequest = (): request.Test => {
