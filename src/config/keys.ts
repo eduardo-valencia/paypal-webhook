@@ -8,6 +8,7 @@ interface Keys {
   port?: number
   databaseUrl: string
   paypalEmail: string
+  useSandbox?: boolean
 }
 
 const getCamelCasedKeys = (): object =>
