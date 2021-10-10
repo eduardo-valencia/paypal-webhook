@@ -58,11 +58,11 @@ const addValidPayment = async (event: PaymentEvent): Promise<void> => {
 }
 
 const handleRequest = async (req: Request, res: Response): Promise<void> => {
-  res.status(200).end()
   const isValid: boolean = await validateEventData(req.body)
   if (isValid) {
     await addValidPayment(req.body)
   }
+  res.status(200).end()
 }
 
 paypalRouter.post(routes.webhook, handleRequest)
