@@ -6,6 +6,8 @@ import PaymentEvent from "../../types/PaymentEvent";
 import ValidationResponse, {
   ValidationBody,
 } from "../../types/ValidationResponse";
+import PaypalPaymentRepo from "../../repos/PaypalPayment";
+import PaypalPaymentType from "../../types/PaypalPayment";
 
 jest.mock("axios");
 
@@ -19,6 +21,7 @@ const validPaymentEvent: PaymentEvent = {
   last_name: "Valencia",
   payer_email: "eduardo@supercoder.dev",
   payment_status: "Completed",
+  mc_gross: 1,
 };
 
 let response: request.Response = null as unknown as request.Response;
@@ -46,6 +49,15 @@ const mockAxiosResponse = (body: ValidationBody) => {
   );
 };
 
+type PaymentMatch = PaypalPaymentType | null;
+
+const findValidPaymentInDatabase = async (): Promise<PaymentMatch> => {
+  return PaypalPaymentRepo.findOne({
+    status: validPaymentEvent.payment_status,
+    apiId: validPaymentEvent.txn_id,
+  });
+};
+
 describe("When the authorization succeeds", () => {
   beforeEach(() => {
     mockAxiosResponse("VERIFIED");
@@ -55,9 +67,19 @@ describe("When the authorization succeeds", () => {
     testValidResponse(response);
   });
 
-  it.todo("Should add the payment to the database");
+  it("Should add the payment to the database", async () => {
+    const payment: PaymentMatch = await findValidPaymentInDatabase();
+    expect(payment).toBeTruthy();
+  });
 
   describe("When there is already a transaction in the database", () => {
+    beforeEach(async () => {
+      await PaypalPaymentRepo.create({
+        status: validPaymentEvent.payment_status,
+        amount: validPaymentEvent.mc_gross,
+      });
+    });
+
     it.todo("Should not add it again");
   });
 
