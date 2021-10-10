@@ -11,11 +11,12 @@ import PaypalPaymentRepo from '../../repos/PaypalPayment'
 import PaypalPaymentType from '../../types/PaypalPayment'
 import PaypalPaymentService from '../../services/PaypalPayment'
 import keys from '../../config/keys'
+import { routes } from '../../constants/routes'
 
 jest.mock('axios')
 
 const makeRequest = (event: PaymentEvent): request.Test => {
-  return request(app).post('/paypal-webhook').send(event)
+  return request(app).post(routes.webhook).send(event)
 }
 
 const validPaymentEvent: PaymentEvent = {
